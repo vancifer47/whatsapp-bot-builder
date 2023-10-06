@@ -2,7 +2,7 @@
   "name": "whatsapp-bot-builder",
   "version": "0.0.1",
   "description": "Middleware to build Whatsapp Bot",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "tsc --pretty",
     "test": "echo \"Error: no test specified\" && exit 1"
