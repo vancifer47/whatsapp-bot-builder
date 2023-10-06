@@ -58,6 +58,16 @@ whatsappBot.sendWhatsappTemplate(
 );
 ```
 
+## Fetch Media Url Data
+
+You can use the `fetchUserMediaUrl` function to get media url from Whatsapp Media ID. Here's an example of how to use it:
+
+```javascript
+// Send a WhatsApp Template message
+let response = await whatsappBot.fetchUserMediaUrl(media_id);
+console.log(response);
+```
+
 ## Listening Text Message
 
 You can use the `text` function listen for particular message from a user. Here's an example of how to use it:
