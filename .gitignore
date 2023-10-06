@@ -1,0 +1,5 @@
+example
+node_modules
+lib
+.npmignore
+.npmrc
