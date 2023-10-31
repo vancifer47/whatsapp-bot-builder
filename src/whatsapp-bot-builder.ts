@@ -8,9 +8,9 @@ import {
 import { messageBodyParser } from "./message_parser";
 
 interface botBuilderProps {
-  base_url: string;
+  base_url?: string;
   webhook_verify_token: string;
-  meta_version: string;
+  meta_version?: string;
   whatsapp_buisness_id: string;
   buisness_phone_number: string;
   meta_access_token: string;
@@ -62,6 +62,7 @@ export class whatsappBotBuilder implements botBuilderProps {
         Authorization: `Bearer ${this.meta_access_token}`,
       },
     });
+    console.info("Webhook configured and initialized! 😃");
   }
 
   async markMessageAsRead(message_id: string) {
@@ -188,7 +189,7 @@ export class whatsappBotBuilder implements botBuilderProps {
       !payload["hub.verify_token"] ||
       !payload["hub.challenge"]
     ) {
-      res.sendStatus(403);
+      res.status(403).send("Forbidden!");
       return;
     }
     if (
@@ -251,7 +252,6 @@ export class whatsappBotBuilder implements botBuilderProps {
 
   init() {
     let _this = this;
-    console.info("Webhook configured and initialized! 😃");
     return async function (
       req: Request,
       res: Response,
@@ -264,15 +264,13 @@ export class whatsappBotBuilder implements botBuilderProps {
           return _this.verfiyWhatsappToken(webhookPayload, res);
         }
         if (req.method == "POST") {
-          console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-          console.log(JSON.stringify(req.body));
-          console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
           await _this.botListener(req);
         }
-        res.sendStatus(200);
+        res.status(200).send("Success!");
       } catch (error: any) {
-        console.log(error);
-        res.status(500).send({ error: true });
+        res.status(500).send({
+          error: error.message ?? error.data.message ?? JSON.stringify(error),
+        });
       }
       next();
     };

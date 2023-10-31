@@ -140,7 +140,7 @@ export function messageBodyParser(
       }
     }
   } else {
-    console.warn("An unidentified.");
+    console.warn("An unidentified message.");
   }
 
   return output;
