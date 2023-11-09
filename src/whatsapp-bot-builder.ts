@@ -169,7 +169,7 @@ export class whatsappBotBuilder implements botBuilderProps {
 
   document(callback: (params: callbackProps) => void) {
     try {
-      this.addListener("image", null, callback);
+      this.addListener("document", null, callback);
     } catch (error) {
       throw error;
     }
