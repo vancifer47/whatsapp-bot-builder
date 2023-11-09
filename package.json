@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-bot-builder",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Middleware to build Whatsapp Bot",
   "main": "lib/index.js",
   "scripts": {
