@@ -179,6 +179,22 @@ export class whatsappBotBuilder implements botBuilderProps {
     this.addListener("button", payload, callback);
   }
 
+  /** Set's default response from the bot, This is triggered when no listeners match,
+   * It's a Mandatory listener
+   * @param callback - Function
+   */
+  default(callback: (params: callbackProps) => void) {
+    this.addListener("DEFAULT", null, callback);
+  }
+
+  /** Set's error response from the bot, This is triggered when any error occurs,
+   * It's a Mandatory listener
+   * @param callback - Function
+   */
+  errorMessage(callback: (params: callbackProps) => void) {
+    this.addListener("ERROR", null, callback);
+  }
+
   private verfiyWhatsappToken(
     payload: metaWebhookAuthenticatePayload,
     res: Response
@@ -204,6 +220,7 @@ export class whatsappBotBuilder implements botBuilderProps {
   }
 
   private async botListener(req: Request) {
+    let sender_phone_number: string;
     try {
       let data = await messageBodyParser(
         req.body as MetaWebhookMessage,
@@ -217,6 +234,7 @@ export class whatsappBotBuilder implements botBuilderProps {
           type,
           from: { phone },
         } = data.message;
+        sender_phone_number = phone;
         await this.markMessageAsRead(data.message.id);
         if (["image", "document"].includes(type)) {
           if (this.listener?.[type]) {
@@ -239,19 +257,27 @@ export class whatsappBotBuilder implements botBuilderProps {
             data: data.message,
           });
         } else {
-          this.sendWhatsappMessage(phone, {
-            preview_url: false,
-            body: "Seems like a bad input, Please try again!",
+          await this.listener?.DEFAULT({
+            sender: phone,
           });
         }
       }
     } catch (error) {
+      await this.listener?.ERROR({
+        sender: sender_phone_number,
+      });
       throw error;
     }
   }
 
   init() {
     let _this = this;
+    if (!_this.listener?.DEFAULT) {
+      throw new Error(`default handler is required!`);
+    }
+    if (!_this.listener?.ERROR) {
+      throw new Error(`errorMessage handler is required!`);
+    }
     return async function (
       req: Request,
       res: Response,
