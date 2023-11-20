@@ -35,7 +35,7 @@ export class whatsappBotBuilder implements botBuilderProps {
   buisness_phone_number: string;
   meta_access_token: string;
 
-  axiosInstance: Axios;
+  private axiosInstance: Axios;
 
   private listener: any = {};
 
@@ -120,6 +120,19 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  async sendInteractiveMessage(to: string, interactiveComponents: any) {
+    try {
+      let bodyParams = constructBodyParams(
+        to,
+        "interactive",
+        interactiveComponents
+      );
+      await this.axiosInstance.post("/messages", bodyParams);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async fetchUserMediaUrl(media_id: string) {
     const response = await this.axiosInstance.get(
       this.base_url.replace(this.buisness_phone_number, media_id)
@@ -129,8 +142,16 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
-  addListener(
-    type: string,
+  private addListener(
+    type:
+      | "text"
+      | "image"
+      | "document"
+      | "button"
+      | "interactive_button"
+      | "interactive_radio"
+      | "DEFAULT"
+      | "ERROR",
     message_id: string | undefined,
     callback: (params: callbackProps) => void
   ) {
@@ -151,6 +172,11 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  /**
+   * This listens to inbound unique text payload
+   * @param payload - String - This is text payload for eg., Hello
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
   text(message: string, callback: (params: callbackProps) => void) {
     try {
       this.addListener("text", message, callback);
@@ -159,6 +185,10 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  /**
+   * This listens to inbound image, There can be only one instance of it
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
   image(callback: (params: callbackProps) => void) {
     try {
       this.addListener("image", null, callback);
@@ -167,6 +197,10 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  /**
+   * This listens to inbound document, There can be only one instance of it
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
   document(callback: (params: callbackProps) => void) {
     try {
       this.addListener("document", null, callback);
@@ -175,8 +209,37 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  /**
+   * This listens to inbound unique button payload
+   * @param payload - String - This is button payload for eg., Home
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
   button(payload: string, callback: (params: callbackProps) => void) {
     this.addListener("button", payload, callback);
+  }
+
+  /**
+   * This listens to inbound unique radio_id of interactive message
+   * @param payload - String - This is radio_id of interactive messages
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
+  interactive_radio(
+    payload: string,
+    callback: (params: callbackProps) => void
+  ) {
+    this.addListener("interactive_radio", payload, callback);
+  }
+
+  /**
+   * This listens to inbound unique button_id of interactive message
+   * @param payload - String - This is button_id of interactive messages
+   * @param callback - Function ({sender,data}) Action to be performed once this listener is triggered
+   */
+  interactive_button(
+    payload: string,
+    callback: (params: callbackProps) => void
+  ) {
+    this.addListener("interactive_button", payload, callback);
   }
 
   /** Set's default response from the bot, This is triggered when no listeners match,
@@ -246,11 +309,23 @@ export class whatsappBotBuilder implements botBuilderProps {
           }
         }
         let listener_id;
-        if (type == "text") {
-          listener_id = data.message.text.body;
-        } else if (type == "button") {
-          listener_id = data.message.button.payload;
+        switch (type) {
+          case "text":
+            listener_id = data.message.text.body;
+            break;
+          case "button":
+            listener_id = data.message.button.payload;
+            break;
+          case "interactive_radio":
+            listener_id = data.message.interactive.list_reply.id;
+            break;
+          case "interactive_button":
+            listener_id = data.message.interactive.button_reply.id;
+            break;
+          default:
+            break;
         }
+
         if (listener_id && this.listener[type][listener_id]) {
           await this.listener[type][listener_id]({
             sender: phone,

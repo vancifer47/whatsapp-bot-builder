@@ -104,11 +104,11 @@ export function messageBodyParser(
     let msgType: string = message.type;
     if (message.type == "interactive") {
       if (message.interactive?.type === "list_reply") {
-        msgType = "radio_button";
-        message.list_reply = message.interactive.list_reply;
+        msgType = "interactive_radio";
+        message.interactive.list_reply = message.interactive.list_reply;
       } else if (message.interactive?.type === "button_reply") {
-        msgType = "simple_button";
-        message.button_reply = message.interactive.button_reply;
+        msgType = "interactive_button";
+        message.interactive.button_reply = message.interactive.button_reply;
       }
     }
     if (message.type == "unsupported") {

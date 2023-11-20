@@ -29,11 +29,15 @@ export interface Message {
   };
   interactive?: {
     type: string;
-    list_reply?: string;
-    button_reply?: string;
+    list_reply?: {
+      id: string;
+      title: string;
+    };
+    button_reply?: {
+      id: string;
+      title: string;
+    };
   };
-  list_reply?: string;
-  button_reply?: string;
   context?: any;
   errors?: any;
 }
