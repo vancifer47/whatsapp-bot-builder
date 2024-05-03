@@ -1,20 +1,12 @@
 import { Request, Response } from "express";
 import axios, { Axios } from "axios";
 import {
+  botBuilderProps,
   callbackProps,
   MetaWebhookMessage,
   metaWebhookAuthenticatePayload,
-} from "./bot";
+} from "@types";
 import { messageBodyParser } from "./message_parser";
-
-interface botBuilderProps {
-  base_url?: string;
-  webhook_verify_token: string;
-  meta_version?: string;
-  whatsapp_buisness_id: string;
-  buisness_phone_number: string;
-  meta_access_token: string;
-}
 
 const constructBodyParams = (to: string, type: string, bodyItems: any) => {
   let bodyParams = {
@@ -35,7 +27,7 @@ export class whatsappBotBuilder implements botBuilderProps {
   buisness_phone_number: string;
   meta_access_token: string;
 
-  private axiosInstance: Axios;
+  protected axiosInstance: Axios;
 
   private listener: any = {};
 
@@ -55,7 +47,7 @@ export class whatsappBotBuilder implements botBuilderProps {
     this.whatsapp_buisness_id = params.whatsapp_buisness_id;
     this.buisness_phone_number = params.buisness_phone_number;
     this.meta_access_token = params.meta_access_token;
-    this.base_url = `https://graph.facebook.com/${this.meta_version}/${this.buisness_phone_number}`;
+    this.base_url = `https://graph.facebook.com/${this.meta_version}`;
     this.axiosInstance = axios.create({
       baseURL: this.base_url,
       headers: {
@@ -70,7 +62,7 @@ export class whatsappBotBuilder implements botBuilderProps {
       return;
     }
     try {
-      await this.axiosInstance.post("/messages", {
+      await this.axiosInstance.post(`/${this.buisness_phone_number}/messages`, {
         messaging_product: "whatsapp",
         status: "read",
         message_id,
@@ -94,7 +86,10 @@ export class whatsappBotBuilder implements botBuilderProps {
   async sendWhatsappMessage(to: string, messageBody: object) {
     try {
       let bodyParams = constructBodyParams(to, "text", messageBody);
-      await this.axiosInstance.post("/messages", bodyParams);
+      await this.axiosInstance.post(
+        `/${this.buisness_phone_number}/messages`,
+        bodyParams
+      );
     } catch (error) {
       throw error;
     }
@@ -114,7 +109,10 @@ export class whatsappBotBuilder implements botBuilderProps {
         },
         components: templateComponents,
       });
-      await this.axiosInstance.post("/messages", bodyParams);
+      await this.axiosInstance.post(
+        `/${this.buisness_phone_number}/messages`,
+        bodyParams
+      );
     } catch (error) {
       throw error;
     }
@@ -127,16 +125,18 @@ export class whatsappBotBuilder implements botBuilderProps {
         "interactive",
         interactiveComponents
       );
-      await this.axiosInstance.post("/messages", bodyParams);
+      await this.axiosInstance.post(
+        `/${this.buisness_phone_number}/messages`,
+        bodyParams
+      );
     } catch (error) {
       throw error;
     }
   }
 
   async fetchUserMediaUrl(media_id: string) {
-    const response = await this.axiosInstance.get(
-      this.base_url.replace(this.buisness_phone_number, media_id)
-    );
+    const response = await this.axiosInstance.get(`/${media_id}`);
+
     if (response.status == 200) {
       return response.data;
     }

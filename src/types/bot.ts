@@ -71,3 +71,12 @@ export interface MetaWebhookMessage {
   object: "whatsapp_business_account";
   entry: Entry[];
 }
+
+export interface botBuilderProps {
+  base_url?: string;
+  webhook_verify_token: string;
+  meta_version?: string;
+  whatsapp_buisness_id: string;
+  buisness_phone_number: string;
+  meta_access_token: string;
+}

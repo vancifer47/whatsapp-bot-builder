@@ -1,4 +1,4 @@
-import { MetaWebhookMessage, Message as IWhatsappMessage } from "./bot";
+import { MetaWebhookMessage, Message as IWhatsappMessage } from "@types";
 
 interface Message extends IWhatsappMessage {
   message_id?: string | null;
