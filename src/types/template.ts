@@ -116,7 +116,7 @@ interface TemplateComponent {
      * Uploaded media asset handle. Use the Resumable Upload API to generate an asset handle.
      */
     header_handle?: Array<string>;
-    body_text?: Array<string>;
+    body_text?: Array<Array<string>>;
   };
 }
 

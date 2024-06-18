@@ -23,13 +23,19 @@ export class ManageWhatsapp extends whatsappBotBuilder {
     };
 
     const validateComponentText = (item: any) => {
-      const paramaterRegex = /{{[a-zA-Z0-9_]+}}/g;
       const matches = item.text.match(paramaterRegex);
       if (matches && matches.length > 0) {
-        if (item.example && item.example.length !== matches.length) {
-          throw new Error(
-            `The example must contain as many variables as there are in the text.`
-          );
+        let toCheckElement = `${item.type}_text`.toLowerCase()
+        if (item.example && item.example[toCheckElement].length) {
+          let exampleContent = item.example[toCheckElement]
+          if (item.type == "BODY") {
+            exampleContent = item.example?.[toCheckElement]?.[0]
+          }
+          if (matches.length !== exampleContent.length) {
+            throw new Error(
+              `The example must contain as many variables as there are in the text.`
+            );
+          }
         }
       }
     };
@@ -93,7 +99,8 @@ export class ManageWhatsapp extends whatsappBotBuilder {
                   break;
                 case "URL":
                   validateComponentText(button);
-                  if (button.text.match(paramaterRegex).length !== 1) {
+                  let match = button?.text?.match(paramaterRegex)
+                  if (match && match.length !== -1) {
                     throw new Error(
                       "Template URL button supports only 1 variable, appended to the end of the URL string."
                     );
@@ -104,7 +111,6 @@ export class ManageWhatsapp extends whatsappBotBuilder {
             break;
         }
       });
-
       return true;
     } catch (error) {
       throw error;
@@ -176,9 +182,7 @@ export class ManageWhatsapp extends whatsappBotBuilder {
         searchParams.append(pagingType, cursor);
       }
       let { data } = await this.axiosInstance.get(
-        `${
-          this.whatsapp_buisness_id
-        }/message_templates?${searchParams.toString()}`
+        `${this.whatsapp_buisness_id}/message_templates?${searchParams.toString()}`
       );
       return data;
     } catch (error) {
@@ -227,9 +231,7 @@ export class ManageWhatsapp extends whatsappBotBuilder {
       searchParams.append("hsm_id", templateId);
       searchParams.append("name", templateName);
       let { data } = await this.axiosInstance.delete(
-        `${
-          this.whatsapp_buisness_id
-        }/message_templates?${searchParams.toString()}`
+        `${this.whatsapp_buisness_id}/message_templates?${searchParams.toString()}`
       );
       return data;
     } catch (error) {
