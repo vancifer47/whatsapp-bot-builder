@@ -169,10 +169,16 @@ export class ManageWhatsapp extends whatsappBotBuilder {
     pagingType?: "before" | "after",
     cursor?: string
   ): Promise<{
-    data: Array<WhatsappTemplate>;
+    data: Array<WhatsappTemplate> | WhatsappTemplate;
     paging: TemplatePaging;
   }> {
     try {
+      if (params.id) {
+        let { data } = await this.axiosInstance.get(
+          `${params.id}`
+        );
+        return data
+      }
       let searchParams = new URLSearchParams();
       Object.entries(params).forEach(([key, value]) => {
         searchParams.append(key, value);

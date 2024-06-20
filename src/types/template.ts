@@ -132,7 +132,7 @@ export interface WhatsappTemplate {
 
 export interface WhatsappTemplateParameters
   extends Partial<
-    Pick<WhatsappTemplate, "name" | "language" | "category" | "status">
+    Pick<WhatsappTemplate, "id" | "name" | "language" | "category" | "status">
   > {
   rejected_reason?: string;
   name_or_content?: string;
