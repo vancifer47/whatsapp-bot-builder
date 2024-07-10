@@ -94,7 +94,7 @@ interface TemplateButtonComponent {
    * Optional example data.
    * Required if the url, copy_code string contains variables.
    */
-  example?: Array<string>;
+  example?: Array<string> | string;
 }
 
 interface TemplateComponent {

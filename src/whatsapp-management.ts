@@ -57,12 +57,14 @@ export class ManageWhatsapp extends whatsappBotBuilder {
       params.components.forEach((item: any) => {
         switch (item.type) {
           case "HEADER":
-            validateTextLength(
-              item.text,
-              60,
-              "Template Header text cannot exceed 60 characters!"
-            );
-            validateComponentText(item);
+            if (item.text) {
+              validateTextLength(
+                item.text,
+                60,
+                "Template Header text cannot exceed 60 characters!"
+              );
+              validateComponentText(item);
+            }
             break;
           case "BODY":
             validateTextLength(
