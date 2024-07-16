@@ -7,6 +7,11 @@ import {
   metaWebhookAuthenticatePayload,
 } from "@types";
 import { messageBodyParser } from "./message_parser";
+import FormData from "form-data"
+import { createReadStream } from "fs";
+import { stat } from "fs/promises"
+import { lookup, extension } from "mime-types"
+import { SUPPORTED_MEDIA_TYPES } from "utils";
 
 const constructBodyParams = (to: string, type: string, bodyItems: any) => {
   let bodyParams = {
@@ -95,6 +100,18 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
+  async sendWhatsappDocument(to: string, messageBody: object) {
+    try {
+      let bodyParams = constructBodyParams(to, "document", messageBody);
+      await this.axiosInstance.post(
+        `/${this.buisness_phone_number}/messages`,
+        bodyParams
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async sendWhatsappTemplate(
     to: string,
     templateName: string,
@@ -131,6 +148,37 @@ export class whatsappBotBuilder implements botBuilderProps {
       );
     } catch (error) {
       throw error;
+    }
+  }
+
+  async uploadMedia(filePath: string, isWebpAnimated: boolean = false) {
+    const file = createReadStream(filePath)
+    const fileType = lookup(filePath)
+    const fileExtension = extension(fileType)
+    let { mimeType, maxSize } = SUPPORTED_MEDIA_TYPES[`.${fileExtension}`]
+    const inputParams = new FormData()
+    inputParams.append("file", file)
+    inputParams.append("type", mimeType)
+    inputParams.append('messaging_product', 'whatsapp')
+    if (typeof maxSize == "object") {
+      maxSize = isWebpAnimated ? maxSize?.animated : maxSize.static
+    }
+    try {
+      const { size } = await stat(filePath)
+      if (size > maxSize) {
+        throw new Error(`Size of the file with type ${mimeType} cannot exceed ${size / 1024} MB`)
+      }
+      const response = await this.axiosInstance.post(`/${this.buisness_phone_number}/media`, inputParams, {
+        headers: {
+          ...this.axiosInstance.defaults.headers.common,
+          ...inputParams.getHeaders(),
+        }
+      });
+      if (response.status == 200) {
+        return response.data;
+      }
+    } catch (error) {
+      throw error
     }
   }
 
@@ -356,7 +404,7 @@ export class whatsappBotBuilder implements botBuilderProps {
     return async function (
       req: Request,
       res: Response,
-      next: Function = () => {}
+      next: Function = () => { }
     ) {
       try {
         if (req.method == "GET") {
