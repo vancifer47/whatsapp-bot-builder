@@ -100,9 +100,9 @@ export class whatsappBotBuilder implements botBuilderProps {
     }
   }
 
-  async sendWhatsappDocument(to: string, messageBody: object) {
+  async sendWhatsappDocument(to: string, messageBody: object, isSticker: Boolean = false) {
     try {
-      let bodyParams = constructBodyParams(to, "document", messageBody);
+      let bodyParams = constructBodyParams(to, isSticker ? "sticker" : "document", messageBody);
       await this.axiosInstance.post(
         `/${this.buisness_phone_number}/messages`,
         bodyParams
